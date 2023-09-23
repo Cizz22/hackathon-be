@@ -46,11 +46,11 @@ export const createOrder = async (req: Request, res: Response) => {
     }
 
     //Validate
-    // if (!req.body.customer_name || !req.body.customer_email || !req.body.customer_phone || !req.body.category || !req.body.deadline || !req.body.payment_method || !req.body.quantity || !req.body.width || !req.body.height || !req.body.length || !req.body.description || !req.body.deadline) {
-    //     return res.status(400).json({
-    //         message: "Bad Request",
-    //     })
-    // }
+    if (!req.body.customer_name || !req.body.customer_email || !req.body.customer_phone || !req.body.category || !req.body.deadline || !req.body.payment_method || !req.body.quantity || !req.body.width || !req.body.height || !req.body.length || !req.body.description || !req.body.deadline) {
+        return res.status(400).json({
+            message: "Bad Request",
+        })
+    }
 
     try {
         let invoice = "INV-" + Math.floor(Math.random() * 1000000000);
