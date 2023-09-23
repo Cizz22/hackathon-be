@@ -52,8 +52,8 @@ model OrderCustomerDetail {
   customer_name        String
   customer_email       String
   customer_phone       String
-  organization_name    String
-  organization_website String
+  organization_name    String?
+  organization_website String?
   order_id             String
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt

@@ -96,8 +96,8 @@ export const createOrder = async (req: Request, res: Response) => {
                         customer_name: req.body.customer_name,
                         customer_email: req.body.customer_email,
                         customer_phone: req.body.customer_phone,
-                        organization_name: req.body.organization_name,
-                        organization_website: req.body.organization_website,
+                        organization_name: req.body?.organization_name,
+                        organization_website: req.body?.organization_website,
                     }
                 })
 
@@ -138,7 +138,8 @@ export const getOrders = async (req: Request, res: Response) => {
                 id: order.id,
                 no_pemesanan: order.invoice,
                 customer: order.OrderCustomerDetail,
-                category: "Boneka"
+                category: order.category,
+                status: order.status,
             }
         })
 

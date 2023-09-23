@@ -20,7 +20,19 @@ const port = process.env.PORT || 3000;
 
 // CORS
 app.use(cors({
-    origin: true
+    origin: true,
+    credentials: true,
+    methods: ["GET", "PUT", "POST", "DELETE", "PATCH"],
+    allowedHeaders: [
+        "Content-Type",
+        "Origin",
+        "X-Requested-With",
+        "Accept",
+        "x-client-key",
+        "x-client-token",
+        "x-client-secret",
+        "Token"
+    ]
 }));
 
 
