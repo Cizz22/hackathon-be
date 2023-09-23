@@ -24,6 +24,7 @@ model Category {
   name      String
   reatedAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // Order     Order[]
 }
 
 model Order {
@@ -33,12 +34,17 @@ model Order {
   width               Int
   height              Int
   length              Int
-  description         String?
+  description         String                @db.Text
   status              String                @default("pending")
-  design_url          String?
+  design_url          String
+  // asset_url           String?
+  // category_id         String
+  // deadline            DateTime
+  // payment_method      String
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   OrderCustomerDetail OrderCustomerDetail[]
+  // Category            Category              @relation(fields: [category_id], references: [id])
 }
 
 model OrderCustomerDetail {

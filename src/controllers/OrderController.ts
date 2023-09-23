@@ -1,14 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { orderSchema } from "../utils/validation.js";
+import fs from 'fs';
+import path from "path";
 
 const prisma = new PrismaClient();
 
-interface FilesRequest extends Request {
-    files?: any;
-}
+export const createOrder = async (req: Request, res: Response) => {
+    console.log(req.file)
 
-export const createOrder = async (req: FilesRequest, res: Response) => {
     try {
         orderSchema.validateAsync(req.body);
     } catch (error: any) {
@@ -20,47 +20,55 @@ export const createOrder = async (req: FilesRequest, res: Response) => {
     try {
         let invoice = "INV-" + Math.floor(Math.random() * 1000000000);
 
-        const { design_img } = req.files;
+        if (!req.file) {
+            res.status(400)
+        } else {
+            const tmp_path = req.file.path
+            const target_path = 'uploads/' + req.file.filename + path.extname(req.file.originalname);
 
-        if (!design_img) res.status(400)
+            const src = fs.createReadStream(tmp_path);
+            var dest = fs.createWriteStream(target_path);
+            src.pipe(dest);
 
-        if (/^image/.test(design_img.mimetype)) return res.sendStatus(400);
+            src.on('end', async function () {
+                const order = await prisma.order.create({
+                    data: {
+                        invoice: invoice,
+                        quantity: parseInt(req.body.quantity),
+                        width: parseInt(req.body.width),
+                        height: parseInt(req.body.height),
+                        length: parseInt(req.body.length),
+                        description: req.body.description,
+                        design_url: target_path,
+                        // category_id: req.body.category_id,
+                        // deadline: new Date(req.body.deadline),
+                        // asset_url: req.body?.asset_url,
+                        // payment_method: req.body.payment_method,
+                    }
+                })
 
-        const path = `${__dirname}/public/designs/${invoice}.png`
+                // Set ordrr customer data
+                const order_customer = await prisma.orderCustomerDetail.create({
+                    data: {
+                        order_id: order.id,
+                        customer_name: req.body.customer_name,
+                        customer_email: req.body.customer_email,
+                        customer_phone: req.body.customer_phone,
+                        organization_name: req.body.organization_name,
+                        organization_website: req.body.organization_website,
+                    }
+                })
 
-        design_img.mv(path)
-
-        const order = await prisma.order.create({
-            data: {
-                invoice: invoice,
-                quantity: req.body.quantity,
-                width: req.body.width,
-                height: req.body.height,
-                length: req.body.length,
-                description: req.body?.description,
-                design_url: path,
-            }
-        })
-
-        // Set ordrr customer data
-        const order_customer = await prisma.orderCustomerDetail.create({
-            data: {
-                order_id: order.id,
-                customer_name: req.body.customer_name,
-                customer_email: req.body.customer_email,
-                customer_phone: req.body.customer_phone,
-                organization_name: req.body.organization_name,
-                organization_website: req.body.organization_website,
-            }
-        })
-
-        res.status(201).json({
-            message: "Order created",
-            success: true,
-            data: {
-                invoice: order.invoice,
-            }
-        })
+                res.status(201).json({
+                    message: "Order created",
+                    success: true,
+                    data: {
+                        invoice: order.invoice,
+                    }
+                })
+            });
+            src.on('error', function (err) { res.render('error'); });
+        }
 
     } catch (error: any) {
         res.status(500).json({
@@ -83,12 +91,12 @@ export const getOrders = async (req: Request, res: Response) => {
             },
         })
 
-        const mapped_orders = orders.map((order) => {
+        const mapped_orders = orders.map((order: any) => {
             return {
                 id: order.id,
                 no_pemesanan: order.invoice,
                 customer: order.OrderCustomerDetail,
-                categoty: "Boneka"
+                category: "Boneka"
             }
         })
 
@@ -103,3 +111,87 @@ export const getOrders = async (req: Request, res: Response) => {
         })
     }
 }
+
+export const getOrder = async (req: Request, res: Response) => {
+    try {
+        const order = await prisma.order.findUnique({
+            where: {
+                id: req.params.id
+            },
+            include: {
+                OrderCustomerDetail: true
+            },
+        })
+
+        if (!order) {
+            res.status(404).json({
+                message: "Order not found",
+                success: false,
+            })
+        }
+
+        res.json({
+            message: "Order fetched",
+            success: true,
+            data: order
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            message: error.message,
+        })
+    }
+}
+
+export const getOrderByInvoice = async (req: Request, res: Response) => {
+    try {
+        const order = await prisma.order.findUnique({
+            where: {
+                invoice: req.params.invoice
+            },
+            include: {
+                OrderCustomerDetail: true
+            },
+        })
+
+        if(!order) {
+            res.status(404).json({
+                message: "Order not found",
+                success: false,
+            })
+        }
+
+        res.json({
+            message: "Order fetched",
+            success: true,
+            data: order
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            message: error.message,
+        })
+    }
+}
+
+export const updateOrderStatus = async (req: Request, res: Response) => {
+    try {
+        const order = await prisma.order.update({
+            where: {
+                id: req.params.id
+            },
+            data: {
+                status: req.body.status
+            }
+        })
+
+        res.json({
+            message: "Order updated",
+            success: true,
+            data: order
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            message: error.message,
+        })
+    }
+}
+

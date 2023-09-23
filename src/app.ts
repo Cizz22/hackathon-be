@@ -2,10 +2,13 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-const fileUpload = require('express-fileupload');
+
 
 import authRouter from "./routes/AuthRoute.js";
 import orderRouter from "./routes/OrderRoute.js";
+
+import path from 'path';
+import * as url from 'url';
 
 dotenv.config();
 
@@ -20,10 +23,6 @@ app.use(cors({
     origin: true
 }));
 
-app.use(fileUpload());
-
-app.use(express.static('public'));
-
 
 // ENDPOINT
 app.get("/", (req: Request, res: Response) => {
@@ -32,6 +31,15 @@ app.get("/", (req: Request, res: Response) => {
         success: true
     })
 })
+
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
+// app.get("/uploads/:file", (req: Request, res: Response) => {
+//     res.sendFile(path.join(__dirname, '../uploads', req.params.file));
+// });
+
+app.use("/uploads", express.static(path.join(__dirname, '../uploads')))
+
 
 app.use("/api/auth", authRouter);
 app.use("/api/order", orderRouter);

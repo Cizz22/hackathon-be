@@ -39,7 +39,7 @@ export const orderSchema = Joi.object({
     organization_name: Joi.string().required().messages({
         "string.required": "Organization name is required",
     }),
-    organization_address: Joi.string().required().messages({
+    organization_website: Joi.string().required().messages({
         "string.required": "Organization address is required",
     }),
     width: Joi.number().required().messages({
@@ -54,5 +54,8 @@ export const orderSchema = Joi.object({
     quantity: Joi.number().required().messages({
         "number.required": "Quantity is required",
     }),
+    description: Joi.string().required().messages({
+        "string.required": "Description is required",
+    })
 })
 
