@@ -28,7 +28,7 @@ Check documentation for more details. [API Documentation](https://documenter.get
 First, clone the project:
 
 ```bash
-$ git clone https://github.com/Cizz22/final-project.git <my-project-name>
+$ git clone git@github.com:Cizz22/hackathon-be.git <my-project-name>
 $ cd <my-project-name>
 ```
 
