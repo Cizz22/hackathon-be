@@ -37,10 +37,10 @@ model Order {
   description         String                @db.Text
   status              String                @default("pending")
   design_url          String
-  // asset_url           String?
-  // category_id         String
-  // deadline            DateTime
-  // payment_method      String
+  asset_url           String?
+  category            String                @default("lainnya")
+  deadline            DateTime              @default(now())
+  payment_method      String                @default("dp")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   OrderCustomerDetail OrderCustomerDetail[]

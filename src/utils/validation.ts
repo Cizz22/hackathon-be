@@ -56,6 +56,18 @@ export const orderSchema = Joi.object({
     }),
     description: Joi.string().required().messages({
         "string.required": "Description is required",
+    }),
+    deadline: Joi.date().required().messages({
+        "date.required": "Deadline is required",
+    }),
+    asset_url: Joi.string().messages({
+        "string": "String is required",
+    }),
+    payment_method: Joi.string().required().messages({
+        "string.required": "Payment method is required",
+    }),
+    category: Joi.string().required().messages({
+        "string.required": "Category is required",
     })
 })
 

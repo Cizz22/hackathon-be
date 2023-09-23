@@ -1,12 +1,14 @@
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
+import { hashPassword } from "../src/utils/password-encryption.js";
+
 
 async function main() {
     const admin = await prisma.user.create({
         data: {
             name: "admin",
-            password: "Password22",
+            password: await hashPassword("Password22"),
             email: "admin@admin.com"
         }
     })
@@ -36,3 +38,5 @@ main()
         await prisma.$disconnect()
         process.exit(1)
     })
+
+

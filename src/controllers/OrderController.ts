@@ -3,19 +3,42 @@ import { Request, Response } from "express";
 import { orderSchema } from "../utils/validation.js";
 import fs from 'fs';
 import path from "path";
+import { google } from 'googleapis'
+import { oauth2Client } from "../utils/google-drive-service.js";
 
 const prisma = new PrismaClient();
+
+const drive = google.drive({
+    version: "v3",
+    auth: oauth2Client,
+});
+
+const uploadFile = async (imgName: any, image: any) => {
+    try {
+        const response = await drive.files.create({
+            requestBody: {
+                name: imgName,
+                mimeType: "image/png",
+                parents: ['14LBPbWmuhPZqAltyHszgDH1MjAh1iQPR']
+            },
+
+            media: {
+                mimeType: "image/png",
+                body: fs.createReadStream(image),
+            },
+        });
+        // report the response from the request
+        return response;
+    } catch (error: any) {
+        //report the error message
+        return error.message;
+    }
+};
 
 export const createOrder = async (req: Request, res: Response) => {
     console.log(req.file)
 
-    try {
-        orderSchema.validateAsync(req.body);
-    } catch (error: any) {
-        res.status(400).json({
-            message: error.message,
-        })
-    }
+    //Validate
 
     try {
         let invoice = "INV-" + Math.floor(Math.random() * 1000000000);
@@ -24,13 +47,32 @@ export const createOrder = async (req: Request, res: Response) => {
             res.status(400)
         } else {
             const tmp_path = req.file.path
-            const target_path = 'uploads/' + req.file.filename + path.extname(req.file.originalname);
+            const file_name = req.file.filename + path.extname(req.file.originalname);
+            const target_path = 'uploads/' + file_name
+
 
             const src = fs.createReadStream(tmp_path);
             var dest = fs.createWriteStream(target_path);
             src.pipe(dest);
 
             src.on('end', async function () {
+
+                const driveInfo = await uploadFile(
+                    file_name,
+                    target_path
+                )
+
+                console.log(driveInfo);
+
+                if (!driveInfo) {
+                    return res.status(500).json({
+                        status: false,
+                        message: "Something is Wrong, please contact developer team"
+                    })
+                }
+
+                const imageLink = `https://drive.google.com/uc?export=view&id=${driveInfo.data.id}`;
+
                 const order = await prisma.order.create({
                     data: {
                         invoice: invoice,
@@ -39,11 +81,11 @@ export const createOrder = async (req: Request, res: Response) => {
                         height: parseInt(req.body.height),
                         length: parseInt(req.body.length),
                         description: req.body.description,
-                        design_url: target_path,
-                        // category_id: req.body.category_id,
+                        design_url: imageLink,
+                        category: req.body.category,
                         // deadline: new Date(req.body.deadline),
-                        // asset_url: req.body?.asset_url,
-                        // payment_method: req.body.payment_method,
+                        asset_url: req.body?.asset_url,
+                        payment_method: req.body.payment_method,
                     }
                 })
 
@@ -153,7 +195,7 @@ export const getOrderByInvoice = async (req: Request, res: Response) => {
             },
         })
 
-        if(!order) {
+        if (!order) {
             res.status(404).json({
                 message: "Order not found",
                 success: false,
