@@ -50,6 +50,29 @@ if everything works, you should able to access the API from http://localhost:300
 
 This project uses PostgreSQL as database. You can download it from [here](https://www.postgresql.org/download/)
 
+After installing PostgreSQL, you need to create a database for the project. You can do this by running the following command:
+
+```bash
+CREATE DATABASE hackathon;
+```
+Set the database credentials in the .env file
+
+```bash
+DATABASE_URL="postgresql://<username>:<password>@localhost:5432/hackathon"
+```
+Migration is done using [Prisma](https://www.prisma.io/). You can read more about Prisma [here](https://www.prisma.io/docs/concepts/overview/what-is-prisma)
+
+To run the migration, run the following command:
+
+```bash
+$ npx prisma migrate reset
+```
+To seed the database, run the following command:
+
+```bash
+$ npx prisma db seed 
+```
+
 ## Application Structure
 
 .
