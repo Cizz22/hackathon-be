@@ -38,6 +38,13 @@ const uploadFile = async (imgName: any, image: any) => {
 export const createOrder = async (req: Request, res: Response) => {
     console.log(req.file)
 
+    if (req.file === undefined) {
+        return res.status(400).json({
+            message: "File is required",
+            success: false,
+        })
+    }
+
     //Validate
 
     try {
@@ -83,7 +90,7 @@ export const createOrder = async (req: Request, res: Response) => {
                         description: req.body.description,
                         design_url: imageLink,
                         category: req.body.category,
-                        // deadline: new Date(req.body.deadline),
+                        deadline: req.body.deadline,
                         asset_url: req.body?.asset_url,
                         payment_method: req.body.payment_method,
                     }
